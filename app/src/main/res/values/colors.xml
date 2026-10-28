@@ -2,4 +2,16 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Палитра покеболов -->
+    <!-- Poké Ball: красный -->
+    <color name="poke_red">#E3350D</color>
+    <color name="poke_dark_red">#B22B0A</color>
+    <!-- Great Ball: синий -->
+    <color name="great_ball_blue">#3B4CCA</color>
+    <color name="great_ball_dark_blue">#2A3699</color>
+    <!-- Ultra Ball: жёлтый (акцент) -->
+    <color name="ultra_ball_yellow">#F2D51B</color>
+    <!-- Чёрный и белый цвета покебола -->
+    <color name="poke_black">#23252A</color>
 </resources>

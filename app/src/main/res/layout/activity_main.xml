@@ -5,13 +5,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:paddingStart="16dp"
+    android:paddingTop="16dp"
+    android:paddingEnd="16dp"
     tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/tvGreeting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="Привет!" />
 
     <EditText
         android:id="@+id/etQuery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:hint="Имя или ID покемона (например: ditto или 25)"/>
 
     <Button
@@ -21,6 +32,16 @@
         android:layout_marginTop="8dp"
         android:text="Найти в Poke API" />
 
+    <!-- Картинка покемона (спрайт из Poke API), скрыта до успешного поиска -->
+    <ImageView
+        android:id="@+id/ivPokemon"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="16dp"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone"
+        android:contentDescription="Спрайт персонажа" />
+
     <TextView
         android:id="@+id/tvResult"
         android:layout_width="match_parent"
@@ -28,5 +49,34 @@
         android:layout_marginTop="24dp"
         android:textSize="16sp"
         android:text="Здесь появится информация о персонаже"/>
+
+    <!-- Контрастная кнопка: белая с красной рамкой и красным текстом,
+         активируется только после успешного поиска -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddSaved"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:enabled="false"
+        android:alpha="0.5"
+        android:text="Добавить в сохранённые"
+        android:textColor="@color/poke_red"
+        android:backgroundTint="@color/white"
+        app:strokeColor="@color/poke_red"
+        app:strokeWidth="2dp" />
+
+    <!-- Растягивающийся отступ, прижимающий нижнюю кнопку к низу экрана -->
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- Отступ от нижней границы экрана ~1,5 см (95dp) -->
+    <Button
+        android:id="@+id/btnSaved"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="95dp"
+        android:text="Сохранённые персонажи" />
 
 </LinearLayout>

@@ -13,7 +13,9 @@ data class SavedPokemon(
     val fact: String
 )
 
-class MyDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "pokemon_db", null, 1) {
+// Отдельный файл базы, чтобы не конфликтовать с DatabaseHelper ("pokemon_db"),
+// иначе onCreate() не будет вызван и таблица saved_pokemons не создастся
+class MyDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "saved_pokemons_db", null, 1) {
 
     override fun onCreate(db: SQLiteDatabase?) {
         // Создаем таблицу при первом запуске
@@ -44,6 +46,18 @@ class MyDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "pokemon_db
         }
         // REPLACE обновит запись, если такой id уже есть
         db.insertWithOnConflict("saved_pokemons", null, values, SQLiteDatabase.CONFLICT_REPLACE)
+        db.close()
+    }
+
+    // Метод для редактирования записи
+    fun updatePokemon(pokemon: SavedPokemon) {
+        val db = this.writableDatabase
+        val values = ContentValues().apply {
+            put("name", pokemon.name)
+            put("imageUrl", pokemon.imageUrl)
+            put("fact", pokemon.fact)
+        }
+        db.update("saved_pokemons", values, "id = ?", arrayOf(pokemon.id.toString()))
         db.close()
     }
 
