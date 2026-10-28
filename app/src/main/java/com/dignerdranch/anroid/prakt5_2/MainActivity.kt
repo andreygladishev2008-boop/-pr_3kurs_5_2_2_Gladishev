@@ -24,6 +24,16 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "PokeAPI"
+
+        // Перевод типов покемонов на русский
+        private val TYPE_NAMES = mapOf(
+            "normal" to "Обычный", "fire" to "Огненный", "water" to "Водный",
+            "electric" to "Электро", "grass" to "Травяной", "ice" to "Ледяный",
+            "fighting" to "Боевой", "poison" to "Ядовитый", "ground" to "Земляной",
+            "flying" to "Летающий", "psychic" to "Психический", "bug" to "Насекомое",
+            "rock" to "Каменный", "ghost" to "Призрачный", "dragon" to "Дракон",
+            "dark" to "Тёмный", "steel" to "Стальной", "fairy" to "Фейри"
+        )
     }
 
     private lateinit var dbHelper: DatabaseHelper
@@ -33,8 +43,9 @@ class MainActivity : AppCompatActivity() {
 
     // Последний успешно найденный покемон (для кнопки "Добавить в сохранённые")
     private var lastPokemon: Pokemon? = null
-    // URL спрайта последнего найденного покемона
+    // URL спрайта и тип последнего найденного покемона
     private var lastSpriteUrl: String? = null
+    private var lastType: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +91,13 @@ class MainActivity : AppCompatActivity() {
                 withContext(Dispatchers.IO) {
                     // REPLACE: если такой покемон уже есть — запись обновится
                     savedDbHelper.savePokemon(
-                        SavedPokemon(id = pokemon.id, name = pokemon.name, imageUrl = lastSpriteUrl, fact = fact)
+                        SavedPokemon(
+                            id = pokemon.id,
+                            name = pokemon.name,
+                            imageUrl = lastSpriteUrl,
+                            fact = fact,
+                            type = lastType
+                        )
                     )
                 }
                 // Блокируем кнопку до следующего поиска, чтобы не дублировать
@@ -147,6 +164,13 @@ class MainActivity : AppCompatActivity() {
                     }
                     lastSpriteUrl = spriteUrl
 
+                    // Типы покемона (обычно 1-2), сортируем по слоту и переводим
+                    val typeNames = response.types
+                        ?.sortedBy { it.slot }
+                        ?.joinToString(", ") { TYPE_NAMES[it.type.name] ?: it.type.name }
+                        ?: "неизвестен"
+                    lastType = typeNames
+
                     // Сохранение в SQLite базу данных на фоновом потоке
                     withContext(Dispatchers.IO) {
                         dbHelper.insertPokemon(pokemon)
@@ -159,6 +183,7 @@ class MainActivity : AppCompatActivity() {
                     val weightKg = pokemon.weight / 10.0
                     tvResult.text = "Имя: ${pokemon.name}\n" +
                             "ID: ${pokemon.id}\n" +
+                            "Тип: $typeNames\n" +
                             "Рост: ${"%.1f".format(heightMeters)} м\n" +
                             "Вес: ${"%.1f".format(weightKg)} кг\n" +
                             "Базовый опыт (очки): ${pokemon.baseExperience}"
@@ -174,6 +199,7 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "Ошибка HTTP ${e.code()} для запроса '$query'", e)
                     lastPokemon = null
                     lastSpriteUrl = null
+                    lastType = ""
                     ivPokemon.visibility = View.GONE
                     btnAddSaved.isEnabled = false
                     btnAddSaved.alpha = 0.5f
@@ -187,6 +213,7 @@ class MainActivity : AppCompatActivity() {
                     Log.e(TAG, "Ошибка сети для запроса '$query': ${e.javaClass.simpleName}: ${e.message}", e)
                     lastPokemon = null
                     lastSpriteUrl = null
+                    lastType = ""
                     ivPokemon.visibility = View.GONE
                     btnAddSaved.isEnabled = false
                     btnAddSaved.alpha = 0.5f

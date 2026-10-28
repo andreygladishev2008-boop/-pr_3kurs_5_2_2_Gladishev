@@ -12,13 +12,24 @@ data class Sprites(
     val front_default: String?
 )
 
+// Тип покемона: {"slot":1,"type":{"name":"electric"}}
+data class TypeEntry(
+    val slot: Int,
+    val type: TypeDetail
+)
+
+data class TypeDetail(
+    val name: String
+)
+
 data class PokemonResponse(
     val id: Int,
     val name: String,
     val height: Int,
     val weight: Int,
     val base_experience: Int,
-    val sprites: Sprites?
+    val sprites: Sprites?,
+    val types: List<TypeEntry>?
 )
 
 interface PokeApiService {

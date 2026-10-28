@@ -21,4 +21,12 @@
         android:inputType="text"
         android:minLines="2" />
 
+    <EditText
+        android:id="@+id/etType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:hint="Тип (например: Электро)"
+        android:inputType="text" />
+
 </LinearLayout>

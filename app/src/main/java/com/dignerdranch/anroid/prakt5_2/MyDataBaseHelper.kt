@@ -10,12 +10,13 @@ data class SavedPokemon(
     val id: Int,
     val name: String,
     val imageUrl: String?,
-    val fact: String
+    val fact: String,
+    val type: String = ""
 )
 
 // Отдельный файл базы, чтобы не конфликтовать с DatabaseHelper ("pokemon_db"),
 // иначе onCreate() не будет вызван и таблица saved_pokemons не создастся
-class MyDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "saved_pokemons_db", null, 1) {
+class MyDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "saved_pokemons_db", null, 2) {
 
     override fun onCreate(db: SQLiteDatabase?) {
         // Создаем таблицу при первом запуске
@@ -24,15 +25,18 @@ class MyDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "saved_poke
                 id INTEGER PRIMARY KEY,
                 name TEXT,
                 imageUrl TEXT,
-                fact TEXT
+                fact TEXT,
+                type TEXT DEFAULT ''
             )
         """.trimIndent()
         db?.execSQL(createTable)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-        db?.execSQL("DROP TABLE IF EXISTS saved_pokemons")
-        onCreate(db)
+        // v1 -> v2: добавляем колонку с типом, старые записи сохраняем
+        if (oldVersion < 2) {
+            db?.execSQL("ALTER TABLE saved_pokemons ADD COLUMN type TEXT DEFAULT ''")
+        }
     }
 
     // Метод для сохранения (Добавления/Редактирования)
@@ -43,6 +47,7 @@ class MyDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "saved_poke
             put("name", pokemon.name)
             put("imageUrl", pokemon.imageUrl)
             put("fact", pokemon.fact)
+            put("type", pokemon.type)
         }
         // REPLACE обновит запись, если такой id уже есть
         db.insertWithOnConflict("saved_pokemons", null, values, SQLiteDatabase.CONFLICT_REPLACE)
@@ -56,6 +61,7 @@ class MyDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "saved_poke
             put("name", pokemon.name)
             put("imageUrl", pokemon.imageUrl)
             put("fact", pokemon.fact)
+            put("type", pokemon.type)
         }
         db.update("saved_pokemons", values, "id = ?", arrayOf(pokemon.id.toString()))
         db.close()
@@ -73,7 +79,8 @@ class MyDatabaseHelper(context: Context) : SQLiteOpenHelper(context, "saved_poke
                 val name = cursor.getString(cursor.getColumnIndexOrThrow("name"))
                 val imageUrl = cursor.getString(cursor.getColumnIndexOrThrow("imageUrl"))
                 val fact = cursor.getString(cursor.getColumnIndexOrThrow("fact"))
-                pokemonList.add(SavedPokemon(id, name, imageUrl, fact))
+                val type = cursor.getString(cursor.getColumnIndexOrThrow("type")) ?: ""
+                pokemonList.add(SavedPokemon(id, name, imageUrl, fact, type))
             } while (cursor.moveToNext())
         }
         cursor.close()

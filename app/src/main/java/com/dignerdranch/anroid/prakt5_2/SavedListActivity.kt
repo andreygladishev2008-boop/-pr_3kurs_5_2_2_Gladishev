@@ -4,10 +4,13 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import coil.load
 
 class SavedListActivity : AppCompatActivity() {
 
@@ -31,9 +34,9 @@ class SavedListActivity : AppCompatActivity() {
             showEditDialog(null)
         }
 
-        // По клику на элемент — выбор действия: редактировать или удалить
+        // По клику на элемент — открывается карточка персонажа
         listView.setOnItemClickListener { _, _, position, _ ->
-            showActionsDialog(pokemons[position])
+            showCardDialog(pokemons[position])
         }
     }
 
@@ -45,7 +48,10 @@ class SavedListActivity : AppCompatActivity() {
     private fun loadList() {
         pokemons = dbHelper.getAllPokemons()
         adapter.clear()
-        adapter.addAll(pokemons.map { "${it.name} — ${it.fact}" })
+        adapter.addAll(pokemons.map {
+            if (it.type.isNotEmpty()) "${it.name} (${it.type}) — ${it.fact}"
+            else "${it.name} — ${it.fact}"
+        })
         adapter.notifyDataSetChanged()
 
         if (pokemons.isEmpty()) {
@@ -53,21 +59,44 @@ class SavedListActivity : AppCompatActivity() {
         }
     }
 
-    private fun showActionsDialog(pokemon: SavedPokemon) {
-        val options = arrayOf("Редактировать", "Удалить")
+    // Увеличенная карточка персонажа: картинка, имя, тип, факт
+    private fun showCardDialog(pokemon: SavedPokemon) {
+        val view = layoutInflater.inflate(R.layout.dialog_card, null)
+        val ivCard = view.findViewById<ImageView>(R.id.ivCard)
+        val tvName = view.findViewById<TextView>(R.id.tvCardName)
+        val tvType = view.findViewById<TextView>(R.id.tvCardType)
+        val tvFact = view.findViewById<TextView>(R.id.tvCardFact)
+        val tvId = view.findViewById<TextView>(R.id.tvCardId)
+
+        tvName.text = pokemon.name
+        tvFact.text = pokemon.fact
+        tvId.text = "ID: ${pokemon.id}"
+
+        if (pokemon.type.isNotEmpty()) {
+            tvType.text = pokemon.type
+            tvType.visibility = android.view.View.VISIBLE
+        } else {
+            tvType.visibility = android.view.View.GONE
+        }
+
+        if (pokemon.imageUrl != null) {
+            ivCard.visibility = android.view.View.VISIBLE
+            ivCard.load(pokemon.imageUrl)
+        } else {
+            ivCard.visibility = android.view.View.GONE
+        }
+
         AlertDialog.Builder(this)
-            .setTitle(pokemon.name)
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> showEditDialog(pokemon)
-                    1 -> {
-                        dbHelper.deletePokemon(pokemon.id)
-                        Toast.makeText(this, "Запись удалена", Toast.LENGTH_SHORT).show()
-                        loadList()
-                    }
-                }
+            .setView(view)
+            .setPositiveButton("Редактировать") { _, _ ->
+                showEditDialog(pokemon)
             }
-            .setNegativeButton("Отмена", null)
+            .setNegativeButton("Удалить") { _, _ ->
+                dbHelper.deletePokemon(pokemon.id)
+                Toast.makeText(this, "Запись удалена", Toast.LENGTH_SHORT).show()
+                loadList()
+            }
+            .setNeutralButton("Закрыть", null)
             .show()
     }
 
@@ -75,10 +104,12 @@ class SavedListActivity : AppCompatActivity() {
         val view = layoutInflater.inflate(R.layout.dialog_pokemon, null)
         val etName = view.findViewById<EditText>(R.id.etName)
         val etFact = view.findViewById<EditText>(R.id.etFact)
+        val etType = view.findViewById<EditText>(R.id.etType)
 
         pokemon?.let {
             etName.setText(it.name)
             etFact.setText(it.fact)
+            etType.setText(it.type)
         }
 
         AlertDialog.Builder(this)
@@ -87,6 +118,7 @@ class SavedListActivity : AppCompatActivity() {
             .setPositiveButton("Сохранить") { _, _ ->
                 val name = etName.text.toString().trim()
                 val fact = etFact.text.toString().trim()
+                val type = etType.text.toString().trim()
 
                 if (name.isEmpty() || fact.isEmpty()) {
                     Toast.makeText(this, "Заполните все поля!", Toast.LENGTH_SHORT).show()
@@ -95,7 +127,8 @@ class SavedListActivity : AppCompatActivity() {
                         id = pokemon?.id ?: System.currentTimeMillis().toInt(),
                         name = name,
                         imageUrl = pokemon?.imageUrl,
-                        fact = fact
+                        fact = fact,
+                        type = type
                     )
                     if (pokemon == null) {
                         dbHelper.savePokemon(newPokemon)
