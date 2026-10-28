@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:padding="24dp">
+
+    <!-- Картинка покемона (спрайт), скрыта если URL не сохранён -->
+    <ImageView
+        android:id="@+id/ivCard"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:visibility="gone"
+        android:contentDescription="Спрайт персонажа" />
+
+    <TextView
+        android:id="@+id/tvCardName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:text="Имя" />
+
+    <TextView
+        android:id="@+id/tvCardType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textSize="16sp"
+        android:textColor="@color/great_ball_blue"
+        android:text="Тип" />
+
+    <TextView
+        android:id="@+id/tvCardFact"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:text="Факт" />
+
+    <TextView
+        android:id="@+id/tvCardId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="13sp"
+        android:textColor="@android:color/darker_gray"
+        android:text="ID" />
+
+</LinearLayout>
